@@ -1,7 +1,7 @@
 # Imports
 import os
 import tkinter as tk
-from tkinter import N, W, E, S
+from tkinter import N, W, E, S, Label, Entry, Button
 from tkinter import ttk
 from dotenv import load_dotenv
 import nvdlib as nvd
@@ -65,16 +65,28 @@ severity_label.grid(column=0, row=1, sticky=W)
 severity_entry = ttk.Entry(mainframe, width=30)
 severity_entry.grid(column=1, row=1, sticky=(W, E))
 
+
 # Search Button
 scan_button = ttk.Button(mainframe, text="Search", command=search_vulnerabilities)
 scan_button.grid(column=1, row=2, sticky=W)
 
+# Top labels for output
+service_output_label = ttk.Label(mainframe, text="Service", font=("Arial", 14))
+service_output_label.grid(column=0, row=3, columnspan=2, sticky=(W, E), pady=(10, 5))
+service_output_label = ttk.Label(mainframe, text="Severity", font=("Arial", 14))
+service_output_label.grid(column=1, row=3, columnspan=2, sticky=(W, E), pady=(10, 5))
+service_output_label = ttk.Label(mainframe, text="References", font=("Arial", 14))
+service_output_label.grid(column=2, row=3, columnspan=2, sticky=(W, E), pady=(10, 5))
+
+
+
+
 # Results Text Widget with Scrollbar
 results_text = tk.Text(mainframe, width=60, height=20)
-results_text.grid(column=0, row=3, columnspan=2, sticky=(W, E))
+results_text.grid(column=0, row=4, columnspan=3, sticky=(W, E))
 
 scrollbar = ttk.Scrollbar(mainframe, orient="vertical", command=results_text.yview)
-scrollbar.grid(column=2, row=3, sticky=(N, S))
+scrollbar.grid(column=3, row=4, sticky=(N, S))
 results_text["yscrollcommand"] = scrollbar.set
 
 # Padding for all child widgets inside mainframe
