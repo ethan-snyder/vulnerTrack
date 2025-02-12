@@ -36,7 +36,7 @@ def search_vulnerabilities():
         if nvd_query:
             results_text.insert(tk.END, f"Search Results for Service: {service}\n")
             for result in nvd_query:
-                print("CPE Name: ", results_text.insert(tk.END, f"{result.cpeName}\n"))
+                results_text.insert(tk.END, f"CPE Name: {result.cpeName}\n")
         else:
             results_text.insert(tk.END, "No results found.\n")
     except Exception as e:
