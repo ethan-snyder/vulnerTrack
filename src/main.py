@@ -26,17 +26,21 @@ def search_vulnerabilities():
         return
 
     try:
-        # Perform NVD query using nvdlib
-        nvd_query = nvd.searchCPE(keywordSearch=service, key=api_key, limit=5)
+        # Perform NVD search
+        nvd_query = nvd.searchCVE(keywordSearch=service, key=api_key, limit=5)
 
-        # Clear previous results
-        results_text.delete(1.0, tk.END)
+        results_text.delete(1.0, tk.END)# Clear previous results
 
         # Display results in the text widget
         if nvd_query:
-            results_text.insert(tk.END, f"Search Results for Service: {service}\n")
+            results_text.insert(tk.END, f"Search Results for Service: {service}\n\n")
             for result in nvd_query:
-                results_text.insert(tk.END, f"CPE Name: {result.cpeName}\n")
+                cve_id = result.id
+                score = result.score if hasattr(result, 'score') else "N/A"
+
+                # Format the output with tabs to align columns
+                output = f"{score}\t{cve_id}\n"
+                results_text.insert(tk.END, output)
         else:
             results_text.insert(tk.END, "No results found.\n")
     except Exception as e:
@@ -74,15 +78,18 @@ scan_button = ttk.Button(mainframe, text="Search", command=search_vulnerabilitie
 scan_button.grid(column=1, row=2, sticky=W)
 
 # Top labels for output
-service_output_label = ttk.Label(mainframe, text="Service", style="Custom.TLabel")
-service_output_label.grid(column=0, row=3, columnspan=2, sticky=(W, E), pady=(10, 5))
-service_output_label = ttk.Label(mainframe, text="Severity", style="Custom.TLabel")
-service_output_label.grid(column=1, row=3, columnspan=2, sticky=(W, E), pady=(10, 5))
+
+# Top labels for output
+score_output_label = ttk.Label(mainframe, text="Score", style="Custom.TLabel")
+score_output_label.grid(column=0, row=3, sticky=(W, E), pady=(10, 5))
+cve_output_label = ttk.Label(mainframe, text="CVE ID", style="Custom.TLabel")
+cve_output_label.grid(column=1, row=3, sticky=(W, E), pady=(10, 5))
 service_output_label = ttk.Label(mainframe, text="References", style="Custom.TLabel")
 service_output_label.grid(column=2, row=3, columnspan=2, sticky=(W, E), pady=(10, 5))
 
-# Results Text Widget with Scrollbar
-output_frame = tk.Frame(mainframe)
+
+## Results Text Widget with Scrollbar
+output_frame = tk.Frame(mainframe) # Nested frame for output
 output_frame.grid(row=4, column=0, columnspan=3, sticky=(N, W, E))
 
 results_text = tk.Text(output_frame, width=60, height=20)
@@ -96,5 +103,6 @@ results_text["yscrollcommand"] = scrollbar.set
 for child in mainframe.winfo_children():
     child.grid_configure(padx=5, pady=5)
 
-# Run the application
+
+## Run the application
 root.mainloop()
