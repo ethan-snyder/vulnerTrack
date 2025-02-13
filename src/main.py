@@ -1,4 +1,4 @@
-# Imports
+## Imports
 import os
 import tkinter as tk
 from tkinter import N, W, E, S, Label, Entry, Button
@@ -16,7 +16,7 @@ if not api_key:
     raise ValueError("API key not found. Make sure it's stored in the .env file or set as an environment variable.")
 
 
-# Function to handle NVD search and display results
+## Function to handle NVD search and display results
 def search_vulnerabilities():
     service = service_entry.get()
     severity = severity_entry.get()
@@ -43,7 +43,7 @@ def search_vulnerabilities():
         results_text.insert(tk.END, f"Error during search: {e}\n")
 
 
-# GUI Setup
+## GUI Setup
 root = tk.Tk()
 root.title("vulnerTrack")
 
@@ -78,14 +78,14 @@ service_output_label.grid(column=1, row=3, columnspan=2, sticky=(W, E), pady=(10
 service_output_label = ttk.Label(mainframe, text="References", font=("Arial", 14))
 service_output_label.grid(column=2, row=3, columnspan=2, sticky=(W, E), pady=(10, 5))
 
-
-
-
 # Results Text Widget with Scrollbar
-results_text = tk.Text(mainframe, width=60, height=20)
+output_frame = tk.Frame(mainframe, bg="red")
+output_frame.grid(row=4, column=0, columnspan=3, sticky=(N, W, E))
+
+results_text = tk.Text(output_frame, width=60, height=20)
 results_text.grid(column=0, row=4, columnspan=3, sticky=(W, E))
 
-scrollbar = ttk.Scrollbar(mainframe, orient="vertical", command=results_text.yview)
+scrollbar = ttk.Scrollbar(output_frame, orient="vertical", command=results_text.yview)
 scrollbar.grid(column=3, row=4, sticky=(N, S))
 results_text["yscrollcommand"] = scrollbar.set
 
