@@ -1,7 +1,7 @@
 ## Imports
 import os
 import tkinter as tk
-from tkinter import N, W, E, S, Label, Entry, Button
+from tkinter import N, W, E, S, font
 from tkinter import ttk
 from dotenv import load_dotenv
 import nvdlib as nvd
@@ -46,21 +46,24 @@ def search_vulnerabilities():
 ## GUI Setup
 root = tk.Tk()
 root.title("vulnerTrack")
+style = ttk.Style()
 
 # Main Frame using ttk.Frame for padding support
-mainframe = ttk.Frame(root, padding="10 10 10 10")
+style.configure("Custom.TFrame", background="black", foreground="black")
+mainframe = ttk.Frame(root, padding="10 10 10 10", style="Custom.TFrame")
 mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
 
 # Service Label and Entry Field
-service_label = ttk.Label(mainframe, text="Service:")
+style.configure("Custom.TLabel", foreground="#90EE90", font=("Terminal", 12), background="black")
+service_label = ttk.Label(mainframe, text="Service:", style="Custom.TLabel")
 service_label.grid(column=0, row=0, sticky=W)
 service_entry = ttk.Entry(mainframe, width=30)
 service_entry.grid(column=1, row=0, sticky=(W, E))
 
 # Severity Label and Entry Field (Optional)
-severity_label = ttk.Label(mainframe, text="Severity (Optional):")
+severity_label = ttk.Label(mainframe, text="Severity (Optional):", style="Custom.TLabel")
 severity_label.grid(column=0, row=1, sticky=W)
 severity_entry = ttk.Entry(mainframe, width=30)
 severity_entry.grid(column=1, row=1, sticky=(W, E))
@@ -71,15 +74,15 @@ scan_button = ttk.Button(mainframe, text="Search", command=search_vulnerabilitie
 scan_button.grid(column=1, row=2, sticky=W)
 
 # Top labels for output
-service_output_label = ttk.Label(mainframe, text="Service", font=("Arial", 14))
+service_output_label = ttk.Label(mainframe, text="Service", style="Custom.TLabel")
 service_output_label.grid(column=0, row=3, columnspan=2, sticky=(W, E), pady=(10, 5))
-service_output_label = ttk.Label(mainframe, text="Severity", font=("Arial", 14))
+service_output_label = ttk.Label(mainframe, text="Severity", style="Custom.TLabel")
 service_output_label.grid(column=1, row=3, columnspan=2, sticky=(W, E), pady=(10, 5))
-service_output_label = ttk.Label(mainframe, text="References", font=("Arial", 14))
+service_output_label = ttk.Label(mainframe, text="References", style="Custom.TLabel")
 service_output_label.grid(column=2, row=3, columnspan=2, sticky=(W, E), pady=(10, 5))
 
 # Results Text Widget with Scrollbar
-output_frame = tk.Frame(mainframe, bg="red")
+output_frame = tk.Frame(mainframe)
 output_frame.grid(row=4, column=0, columnspan=3, sticky=(N, W, E))
 
 results_text = tk.Text(output_frame, width=60, height=20)
