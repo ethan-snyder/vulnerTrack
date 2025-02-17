@@ -17,40 +17,40 @@ if not api_key:
 
 
 def search_vulnerabilities():
-    service = service_entry.get()
-    severity = severity_entry.get().upper()
+        service = service_entry.get()
+        severity = severity_entry.get().upper()
 
-    if not service:
-        results_tree.insert('', 'end', values=("Error: Service field cannot be empty.",))
-        return
+        if not service:
+            results_tree.insert('', 'end', values=("Error: Service field cannot be empty.",))
+            return
 
-    valid_severities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
-    if severity and severity not in valid_severities:
-        results_tree.insert('', 'end', values=("Error: Invalid severity. Please use LOW, MEDIUM, HIGH, or CRITICAL.",))
-        return
+        valid_severities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+        if severity and severity not in valid_severities:
+            results_tree.insert('', 'end', values=("Error: Invalid severity. Please use LOW, MEDIUM, HIGH, or CRITICAL.",))
+            return
 
-    try:
-        # Perform NVD search
-        nvd_query = nvd.searchCVE(keywordSearch=service, cvssV3Severity=severity if severity else None, key=api_key,
-                                  limit=5)
+        try:
+            # Perform NVD search
+            nvd_query = nvd.searchCVE(keywordSearch=service, cvssV3Severity=severity if severity else None, key=api_key,
+                                      limit=5)
 
-        # Clear previous results
-        for i in results_tree.get_children():
-            results_tree.delete(i)
+            # Clear previous results
+            for i in results_tree.get_children():
+                results_tree.delete(i)
 
-        # Display results in the Treeview
-        if nvd_query:
-            for cve in nvd_query:
-                cve_id = cve.id
-                score = str(cve.score[1]) if cve.score[1] is not None else "N/A"
+            # Display results in the Treeview
+            if nvd_query:
+                for cve in nvd_query:
+                    cve_id = cve.id
+                    score = str(cve.score[1]) if cve.score[1] is not None else "N/A"
 
-                references = ", ".join([ref.url for ref in cve.references]) if cve.references else "N/A"
+                    references = ", ".join([ref.url for ref in cve.references]) if cve.references else "N/A"
 
-                results_tree.insert('', 'end', values=(score, cve_id, references))
-        else:
-            results_tree.insert('', 'end', values=("No results found.",))
-    except Exception as e:
-        results_tree.insert('', 'end', values=(f"Error during search: {e}",))
+                    results_tree.insert('', 'end', values=(score, cve_id, references))
+            else:
+                results_tree.insert('', 'end', values=("No results found.",))
+        except Exception as e:
+            results_tree.insert('', 'end', values=(f"Error during search: {e}",))
 
 
 ## GUI Setup
@@ -67,10 +67,12 @@ root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
 
 # Radio Buttons for CPE vs CVE
-searchV = tk.StringVar(root, "1")
+searchV = tk.StringVar(root, 1)
 
-tk.Radiobutton(mainframe, text="CPE", padx=20, variable=searchV, value=1, bg="black", fg="white").grid(column=0, row=0, sticky=W)
-tk.Radiobutton(mainframe, text="CVE", padx=20, variable=searchV, value=2, bg="black", fg="white").grid(column=1, row=0, sticky=W)
+ttk.Radiobutton(mainframe, text="CVE", variable=searchV, value=1).grid(column=0, row=0, sticky=W)
+ttk.Radiobutton(mainframe, text="CPE", variable=searchV, value=2).grid(column=1, row=0, sticky=W)
+style.configure("TRadiobutton", background="black", foreground="white")
+style.map("TRadiobutton",indicatorcolor=[("selected", "#90EE90"), ("!selected", "white")])
 
 # Service Label and Entry Field
 style.configure("Custom.TLabel", foreground="#90EE90", font=("Terminal", 12), background="black")
