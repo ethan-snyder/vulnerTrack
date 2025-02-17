@@ -15,44 +15,48 @@ api_key = os.getenv('API_KEY')
 if not api_key:
     raise ValueError("API key not found. Make sure it's stored in the .env file or set as an environment variable.")
 
-## Function to handle NVD search and display results
+
 def search_vulnerabilities():
     service = service_entry.get()
     severity = severity_entry.get().upper()
 
     if not service:
-        results_text.insert(tk.END, "Error: Service field cannot be empty.\n")
+        results_tree.insert('', 'end', values=("Error: Service field cannot be empty.",))
         return
 
     valid_severities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
     if severity and severity not in valid_severities:
-        results_text.insert(tk.END, "Error: Invalid severity. Please use LOW, MEDIUM, HIGH, or CRITICAL.\n")
+        results_tree.insert('', 'end', values=("Error: Invalid severity. Please use LOW, MEDIUM, HIGH, or CRITICAL.",))
         return
 
     try:
         # Perform NVD search
-        nvd_query = nvd.searchCVE(keywordSearch=service, cvssV3Severity=severity if severity else None, key=api_key, limit=5)
+        nvd_query = nvd.searchCVE(keywordSearch=service, cvssV3Severity=severity if severity else None, key=api_key,
+                                  limit=5)
 
-        results_text.delete(1.0, tk.END)  # Clear previous results
+        # Clear previous results
+        for i in results_tree.get_children():
+            results_tree.delete(i)
 
-        # Display results in the text widget
+        # Display results in the Treeview
         if nvd_query:
-            results_text.insert(tk.END, f"Search Results for Service: {service}\n\n")
-            for result in nvd_query:
-                cve_id = result.id
-                score = result.score if hasattr(result, 'score') else "N/A"
+            for cve in nvd_query:
+                cve_id = cve.id
+                score = str(cve.score[1]) if cve.score[1] is not None else "N/A"
 
-                # Format the output with tabs to align columns
-                output = f"{score}\t{cve_id}\n"
-                results_text.insert(tk.END, output)
+                references = ", ".join([ref.url for ref in cve.references]) if cve.references else "N/A"
+
+                results_tree.insert('', 'end', values=(score, cve_id, references))
         else:
-            results_text.insert(tk.END, "No results found.\n")
+            results_tree.insert('', 'end', values=("No results found.",))
     except Exception as e:
-        results_text.insert(tk.END, f"Error during search: {e}\n")
+        results_tree.insert('', 'end', values=(f"Error during search: {e}",))
+
 
 ## GUI Setup
 root = tk.Tk()
 root.title("vulnerTrack")
+root.geometry("1000x800")
 style = ttk.Style()
 
 # Main Frame using ttk.Frame for padding support
@@ -85,28 +89,26 @@ severity_entry.grid(column=1, row=2, sticky=(W, E))
 scan_button = ttk.Button(mainframe, text="Search", command=search_vulnerabilities)
 scan_button.grid(column=1, row=3, sticky=W)
 
-# Top labels for output
-score_output_label = ttk.Label(mainframe, text="Score", style="Custom.TLabel")
-score_output_label.grid(column=0, row=4, sticky=(W, E), pady=(10, 5))
-cve_output_label = ttk.Label(mainframe, text="CVE ID", style="Custom.TLabel")
-cve_output_label.grid(column=1, row=4, sticky=(W, E), pady=(10, 5))
-service_output_label = ttk.Label(mainframe, text="References", style="Custom.TLabel")
-service_output_label.grid(column=2, row=4, sticky=(W, E), pady=(10, 5))
+# Results Treeview
+results_tree = ttk.Treeview(mainframe, columns=('Score', 'CVE ID', 'References'), show='headings', height=10)
+results_tree.grid(row=4, column=0, columnspan=3, sticky=(N, W, E, S))
 
-## Results Text Widget with Scrollbar
-output_frame = tk.Frame(mainframe, bg="black") # Nested frame for output
-output_frame.grid(row=5, column=0, columnspan=3, sticky=(N, W, E, S))
+# Configure the Treeview columns
+results_tree.heading('Score', text='Score')
+results_tree.heading('CVE ID', text='CVE ID')
+results_tree.heading('References', text='References')
+results_tree.column('Score', width=100, anchor='center')
+results_tree.column('CVE ID', width=150, anchor='center')
+results_tree.column('References', width=350, anchor='w')
 
-results_text = tk.Text(output_frame, width=60, height=20, bg="black", fg="white")
-results_text.grid(column=0, row=0, sticky=(N, S, W, E))
-
-scrollbar = ttk.Scrollbar(output_frame, orient="vertical", command=results_text.yview)
-scrollbar.grid(column=1, row=0, sticky=(N, S))
-results_text["yscrollcommand"] = scrollbar.set
+# Add a scrollbar
+scrollbar = ttk.Scrollbar(mainframe, orient="vertical", command=results_tree.yview)
+scrollbar.grid(row=4, column=3, sticky=(N, S))
+results_tree.configure(yscrollcommand=scrollbar.set)
 
 # Configure grid weights
-output_frame.columnconfigure(0, weight=1)
-output_frame.rowconfigure(0, weight=1)
+mainframe.columnconfigure(1, weight=1)
+mainframe.rowconfigure(4, weight=1)
 
 # Padding for all child widgets inside mainframe
 for child in mainframe.winfo_children():
