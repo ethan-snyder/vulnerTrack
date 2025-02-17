@@ -15,8 +15,16 @@ api_key = os.getenv('API_KEY')
 if not api_key:
     raise ValueError("API key not found. Make sure it's stored in the .env file or set as an environment variable.")
 
+def on_radio_select():
+    if searchV.get() == "1":  # CVE selected
+        severity_label.grid(column=0, row=2, sticky=W)
+        severity_entry.grid(column=1, row=2, sticky=(W, E))
+    else:  # CPE selected
+        severity_label.grid_remove()
+        severity_entry.grid_remove()
 
 def search_vulnerabilities():
+    if searchV == 1:
         service = service_entry.get()
         severity = severity_entry.get().upper()
 
@@ -51,6 +59,8 @@ def search_vulnerabilities():
                 results_tree.insert('', 'end', values=("No results found.",))
         except Exception as e:
             results_tree.insert('', 'end', values=(f"Error during search: {e}",))
+    else:
+        return
 
 
 ## GUI Setup
@@ -69,8 +79,8 @@ root.rowconfigure(0, weight=1)
 # Radio Buttons for CPE vs CVE
 searchV = tk.StringVar(root, 1)
 
-ttk.Radiobutton(mainframe, text="CVE", variable=searchV, value=1).grid(column=0, row=0, sticky=W)
-ttk.Radiobutton(mainframe, text="CPE", variable=searchV, value=2).grid(column=1, row=0, sticky=W)
+ttk.Radiobutton(mainframe, text="CVE", variable=searchV, value="1", command=on_radio_select).grid(column=0, row=0, sticky=W)
+ttk.Radiobutton(mainframe, text="CPE", variable=searchV, value="2", command=on_radio_select).grid(column=1, row=0, sticky=W)
 style.configure("TRadiobutton", background="black", foreground="white")
 style.map("TRadiobutton",indicatorcolor=[("selected", "#90EE90"), ("!selected", "white")])
 
@@ -115,6 +125,8 @@ mainframe.rowconfigure(4, weight=1)
 # Padding for all child widgets inside mainframe
 for child in mainframe.winfo_children():
     child.grid_configure(padx=5, pady=5)
+
+on_radio_select()
 
 ## Run the application
 root.mainloop()
