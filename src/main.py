@@ -1,4 +1,3 @@
-## Imports
 import os
 import tkinter as tk
 from tkinter import N, W, E, S
@@ -15,6 +14,7 @@ api_key = os.getenv('API_KEY')
 if not api_key:
     raise ValueError("API key not found. Make sure it's stored in the .env file or set as an environment variable.")
 
+
 def on_radio_select():
     if searchV.get() == "1":  # CVE selected
         severity_label.grid(column=0, row=2, sticky=W)
@@ -23,8 +23,13 @@ def on_radio_select():
         severity_label.grid_remove()
         severity_entry.grid_remove()
 
+
 def search_vulnerabilities():
-    if searchV == 1:
+    # Clear previous results
+    for i in results_tree.get_children():
+        results_tree.delete(i)
+
+    if searchV.get() == "1":  # CVE selected
         service = service_entry.get()
         severity = severity_entry.get().upper()
 
@@ -34,33 +39,32 @@ def search_vulnerabilities():
 
         valid_severities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
         if severity and severity not in valid_severities:
-            results_tree.insert('', 'end', values=("Error: Invalid severity. Please use LOW, MEDIUM, HIGH, or CRITICAL.",))
+            results_tree.insert('', 'end',
+                                values=("Error: Invalid severity. Please use LOW, MEDIUM, HIGH, or CRITICAL.",))
             return
 
         try:
             # Perform NVD search
             nvd_query = nvd.searchCVE(keywordSearch=service, cvssV3Severity=severity if severity else None, key=api_key,
                                       limit=5)
-
-            # Clear previous results
-            for i in results_tree.get_children():
-                results_tree.delete(i)
+            print(f"API Response type: {type(nvd_query)}")
+            print(f"API Response: {nvd_query}")
 
             # Display results in the Treeview
             if nvd_query:
                 for cve in nvd_query:
                     cve_id = cve.id
-                    score = str(cve.score[1]) if cve.score[1] is not None else "N/A"
-
+                    score = str(cve.score[1]) if cve.score and len(cve.score) > 1 and cve.score[
+                        1] is not None else "N/A"
                     references = ", ".join([ref.url for ref in cve.references]) if cve.references else "N/A"
-
                     results_tree.insert('', 'end', values=(score, cve_id, references))
             else:
                 results_tree.insert('', 'end', values=("No results found.",))
         except Exception as e:
-            results_tree.insert('', 'end', values=(f"Error during search: {e}",))
+            print(f"Error during search: {str(e)}")
+            results_tree.insert('', 'end', values=(f"Error during search: {str(e)}",))
     else:
-        return
+        results_tree.insert('', 'end', values=("CPE search not implemented yet.",))
 
 
 ## GUI Setup
@@ -77,12 +81,14 @@ root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
 
 # Radio Buttons for CPE vs CVE
-searchV = tk.StringVar(root, 1)
+searchV = tk.StringVar(root, "1")
 
-ttk.Radiobutton(mainframe, text="CVE", variable=searchV, value="1", command=on_radio_select).grid(column=0, row=0, sticky=W)
-ttk.Radiobutton(mainframe, text="CPE", variable=searchV, value="2", command=on_radio_select).grid(column=1, row=0, sticky=W)
+ttk.Radiobutton(mainframe, text="CVE", variable=searchV, value="1", command=on_radio_select).grid(column=0, row=0,
+                                                                                                  sticky=W)
+ttk.Radiobutton(mainframe, text="CPE", variable=searchV, value="2", command=on_radio_select).grid(column=1, row=0,
+                                                                                                  sticky=W)
 style.configure("TRadiobutton", background="black", foreground="white")
-style.map("TRadiobutton",indicatorcolor=[("selected", "#90EE90"), ("!selected", "white")])
+style.map("TRadiobutton", indicatorcolor=[("selected", "#90EE90"), ("!selected", "white")])
 
 # Service Label and Entry Field
 style.configure("Custom.TLabel", foreground="#90EE90", font=("Terminal", 12), background="black")
