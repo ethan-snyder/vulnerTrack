@@ -99,7 +99,7 @@ ttk.Radiobutton(mainframe, text="CVE", variable=searchV, value="1", command=on_r
                                                                                                   sticky=W)
 ttk.Radiobutton(mainframe, text="CPE", variable=searchV, value="2", command=on_radio_select).grid(column=1, row=0,
                                                                                                   sticky=W)
-style.configure("TRadiobutton", background="black", foreground="white")
+style.configure("TRadiobutton", background="black", foreground="#90EE90")
 style.map("TRadiobutton", indicatorcolor=[("selected", "#90EE90"), ("!selected", "white")])
 
 # Service Label and Entry Field
@@ -129,19 +129,6 @@ limit_var = tk.IntVar(value=5)  # Default value 5
 
 # Spinbox
 vcmd = (root.register(validate_spinbox), '%P')
-style.map("Custom.TSpinbox", [('Entry.plain.field', {'children': [(
-    'Entry.background', {'children': [(
-        'Entry.padding', {'children': [(
-            'Entry.textarea', {'sticky': 'nswe'})],
-        'sticky': 'nswe'})], 'sticky': 'nswe'})],
-    'border': '2', 'sticky': 'nswe'})],
-             arrowcolor=[
-                 ('disabled', 'green'),
-                 ('pressed !disabled', 'blue'),
-                 ('focus !disabled', 'green'),
-                 ('hover !disabled', 'yellow')]
-             )
-style.configure("Custom.TSpinbox", fieldbackground="black", foreground="#90EE90", font=("Terminal", 12))
 limit_spinbox = ttk.Spinbox(
     mainframe,
     from_=1,
@@ -150,7 +137,6 @@ limit_spinbox = ttk.Spinbox(
     validate="all",
     validatecommand=vcmd,
     width=10,
-    style="Custom.TSpinbox"
 )
 limit_spinbox.grid(column=1, row=3, sticky=(W))
 
@@ -161,7 +147,19 @@ scan_button = ttk.Button(mainframe, text="Search", command=search_vulnerabilitie
 scan_button.grid(column=2, row=5, sticky=W)
 
 # Results Treeview
-results_tree = ttk.Treeview(mainframe, columns=('Score', 'CVE ID', 'References'), show='headings', height=10)
+style.configure("Custom.Treeview",
+                background="black",
+                foreground="#90EE90",
+                fieldbackground="black",
+                font=("Terminal", 10))
+style.configure("Custom.Treeview.Heading",
+                background="black",
+                foreground="black",
+                font=("Terminal", 11, "bold"))
+style.map("Custom.Treeview",
+          background=[('selected', '#005500')])
+results_tree = ttk.Treeview(mainframe, columns=('Score', 'CVE ID', 'References'),
+                            show='headings', height=10, style="Custom.Treeview")
 results_tree.grid(row=4, column=0, columnspan=3, sticky=(N, W, E, S))
 
 # Configure the Treeview columns
