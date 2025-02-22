@@ -14,7 +14,7 @@ api_key = os.getenv('API_KEY')
 if not api_key:
     raise ValueError("API key not found. Make sure it's stored in the .env file or set as an environment variable.")
 
-
+#Radio button selection handler
 def on_radio_select():
     if searchV.get() == "1":  # CVE selected
         severity_label.grid(column=0, row=2, sticky=W)
@@ -23,7 +23,18 @@ def on_radio_select():
         severity_label.grid_remove()
         severity_entry.grid_remove()
 
+#Input validation for spinbox
+def validate_spinbox(value):
+    if value == "":
+        return True
+    try:
+        int_value = int(value) #converting to int value
+        return 1 <= int_value <= 100
+    except ValueError:
+        return False
 
+
+#Search function which handles both CPE & CVE search
 def search_vulnerabilities():
     # Clear previous results
     for i in results_tree.get_children():
@@ -106,9 +117,19 @@ severity_entry.grid(column=1, row=2, sticky=(W))
 # Output limit label and Entry Field
 limit_label = ttk.Label(mainframe, text="Limit:", style="Custom.TLabel")
 limit_label.grid(column=0, row=3, sticky=W)
-limit_spinbox = tk.Spinbox(mainframe, from_=0, to=100, width=10, relief="sunken",
-                           repeatdelay=500, repeatinterval=100,
-                           font=("Arial", 12), bg="lightgrey", fg="blue")
+limit_var = tk.IntVar(value=5)  # Default value 5
+
+# Register the validation command
+vcmd = (root.register(validate_spinbox), '%P')
+limit_spinbox = ttk.Spinbox(
+    mainframe,
+    from_=1,
+    to=100,
+    textvariable=limit_var,
+    validate="all",
+    validatecommand=vcmd,
+    width=10
+)
 limit_spinbox.grid(column=1, row=3, sticky=(W))
 
 
