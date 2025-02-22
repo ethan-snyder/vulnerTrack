@@ -18,7 +18,7 @@ if not api_key:
 def on_radio_select():
     if searchV.get() == "1":  # CVE selected
         severity_label.grid(column=0, row=2, sticky=W)
-        severity_entry.grid(column=1, row=2, sticky=(W, E))
+        severity_entry.grid(column=1, row=2, sticky=(W))
     else:  # CPE selected
         severity_label.grid_remove()
         severity_entry.grid_remove()
@@ -33,9 +33,10 @@ def validate_spinbox(value):
     except ValueError:
         return False
 
-
 #Search function which handles both CPE & CVE search
 def search_vulnerabilities():
+    root.update()
+
     # Clear previous results
     for i in results_tree.get_children():
         results_tree.delete(i)
@@ -56,8 +57,8 @@ def search_vulnerabilities():
 
         try:
             # Perform NVD search
-            nvd_query = nvd.searchCVE(keywordSearch=service, cvssV3Severity=severity if severity else None, key=api_key,
-                                      limit=5)
+            nvd_query = nvd.searchCVE(keywordSearch=service, cvssV3Severity=severity if severity else None,
+                                      key=api_key,limit=limit_var.get())
             print(f"API Response type: {type(nvd_query)}")
             print(f"API Response: {nvd_query}")
 
@@ -103,15 +104,22 @@ style.map("TRadiobutton", indicatorcolor=[("selected", "#90EE90"), ("!selected",
 
 # Service Label and Entry Field
 style.configure("Custom.TLabel", foreground="#90EE90", font=("Terminal", 12), background="black")
+style.layout("Custom.TEntry", [('Entry.plain.field', {'children': [(
+    'Entry.background', {'children': [(
+        'Entry.padding', {'children': [(
+            'Entry.textarea', {'sticky': 'nswe'})],
+        'sticky': 'nswe'})], 'sticky': 'nswe'})],
+    'border': '2', 'sticky': 'nswe'})])
+style.configure("Custom.TEntry", fieldbackground="black", foreground="#90EE90", font=("Terminal", 12))
 service_label = ttk.Label(mainframe, text="Service:", style="Custom.TLabel")
 service_label.grid(column=0, row=1, sticky=W)
-service_entry = ttk.Entry(mainframe, width=30)
-service_entry.grid(column=1, row=1, sticky=(W, E))
+service_entry = ttk.Entry(mainframe, width=30, style="Custom.TEntry")
+service_entry.grid(column=1, row=1, sticky=(W))
 
 # Severity Label and Entry Field (Optional)
 severity_label = ttk.Label(mainframe, text="Severity (Optional):", style="Custom.TLabel")
 severity_label.grid(column=0, row=2, sticky=W)
-severity_entry = ttk.Entry(mainframe, width=30)
+severity_entry = ttk.Entry(mainframe, width=30, style="Custom.TEntry")
 severity_entry.grid(column=1, row=2, sticky=(W))
 
 # Output limit label and Entry Field
@@ -119,8 +127,21 @@ limit_label = ttk.Label(mainframe, text="Limit:", style="Custom.TLabel")
 limit_label.grid(column=0, row=3, sticky=W)
 limit_var = tk.IntVar(value=5)  # Default value 5
 
-# Register the validation command
+# Spinbox
 vcmd = (root.register(validate_spinbox), '%P')
+style.map("Custom.TSpinbox", [('Entry.plain.field', {'children': [(
+    'Entry.background', {'children': [(
+        'Entry.padding', {'children': [(
+            'Entry.textarea', {'sticky': 'nswe'})],
+        'sticky': 'nswe'})], 'sticky': 'nswe'})],
+    'border': '2', 'sticky': 'nswe'})],
+             arrowcolor=[
+                 ('disabled', 'green'),
+                 ('pressed !disabled', 'blue'),
+                 ('focus !disabled', 'green'),
+                 ('hover !disabled', 'yellow')]
+             )
+style.configure("Custom.TSpinbox", fieldbackground="black", foreground="#90EE90", font=("Terminal", 12))
 limit_spinbox = ttk.Spinbox(
     mainframe,
     from_=1,
@@ -128,7 +149,8 @@ limit_spinbox = ttk.Spinbox(
     textvariable=limit_var,
     validate="all",
     validatecommand=vcmd,
-    width=10
+    width=10,
+    style="Custom.TSpinbox"
 )
 limit_spinbox.grid(column=1, row=3, sticky=(W))
 
