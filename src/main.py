@@ -70,7 +70,7 @@ def search_vulnerabilities():
 ## GUI Setup
 root = tk.Tk()
 root.title("vulnerTrack")
-root.geometry("1000x800")
+root.geometry("800x600")
 style = ttk.Style()
 
 # Main Frame using ttk.Frame for padding support
@@ -101,11 +101,21 @@ service_entry.grid(column=1, row=1, sticky=(W, E))
 severity_label = ttk.Label(mainframe, text="Severity (Optional):", style="Custom.TLabel")
 severity_label.grid(column=0, row=2, sticky=W)
 severity_entry = ttk.Entry(mainframe, width=30)
-severity_entry.grid(column=1, row=2, sticky=(W, E))
+severity_entry.grid(column=1, row=2, sticky=(W))
+
+# Output limit label and Entry Field
+limit_label = ttk.Label(mainframe, text="Limit:", style="Custom.TLabel")
+limit_label.grid(column=0, row=3, sticky=W)
+limit_spinbox = tk.Spinbox(mainframe, from_=0, to=100, width=10, relief="sunken",
+                           repeatdelay=500, repeatinterval=100,
+                           font=("Arial", 12), bg="lightgrey", fg="blue")
+limit_spinbox.grid(column=1, row=3, sticky=(W))
+
+
 
 # Search Button
 scan_button = ttk.Button(mainframe, text="Search", command=search_vulnerabilities)
-scan_button.grid(column=1, row=3, sticky=W)
+scan_button.grid(column=2, row=5, sticky=W)
 
 # Results Treeview
 results_tree = ttk.Treeview(mainframe, columns=('Score', 'CVE ID', 'References'), show='headings', height=10)
